@@ -139,8 +139,8 @@ class AstVisitor : System.Management.Automation.Language.ICustomAstVisitor
     [system.object] VisitIfStatement([System.Management.Automation.Language.IfStatementAst] $ifStmtAst)
     {
         $newClauses = $ifStmtAst.Clauses | ForEach-Object {
-            $newClauseTest = $this.VistitElement($_.Item1)
-            $newStatementBlock = $this.VistitElement($_.Item2)
+            $newClauseTest = $this.VisitElement($_.Item1)
+            $newStatementBlock = $this.VisitElement($_.Item2)
             [System.Tuple[System.Management.Automation.Language.PipelineBaseAst,System.Management.Automation.Language.StatementBlockAst]]::new($newClauseTest,$newStatementBlock)
         }
         $newElseClause = $this.VisitElement($ifStmtAst.ElseClause)
@@ -156,8 +156,8 @@ class AstVisitor : System.Management.Automation.Language.ICustomAstVisitor
     {
         $newCondition = $this.VisitElement($switchStatementAst.Condition)
         $newClauses = $switchStatementAst.Clauses | ForEach-Object {
-            $newClauseTest = $this.VistitElement($_.Item1)
-            $newStatementBlock = $this.VistitElement($_.Item2)
+            $newClauseTest = $this.VisitElement($_.Item1)
+            $newStatementBlock = $this.VisitElement($_.Item2)
             [System.Tuple[System.Management.Automation.Language.ExpressionAst,System.Management.Automation.Language.StatementBlockAst]]::new($newClauseTest,$newStatementBlock)
         }
         $newDefault = $this.VisitElement($switchStatementAst.Default)
