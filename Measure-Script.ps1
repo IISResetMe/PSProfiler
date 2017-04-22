@@ -141,11 +141,11 @@ class AstVisitor : ICustomAstVisitor
 
     [object] VisitIfStatement([IfStatementAst] $ifStmtAst)
     {
-        $newClauses = $ifStmtAst.Clauses | ForEach-Object {
-            $newClauseTest = $this.VisitElement($_.Item1)
-            $newStatementBlock = $this.VisitElement($_.Item2)
+        [Tuple[PipelineBaseAst,StatementBlockAst][]]$newClauses = @(foreach($clause in $ifStmtAst.Clauses){
+            $newClauseTest = [PipelineBaseAst]$this.VisitElement($clause.Item1)
+            $newStatementBlock = [StatementBlockAst]$this.VisitElement($clause.Item2)
             [Tuple[PipelineBaseAst,StatementBlockAst]]::new($newClauseTest,$newStatementBlock)
-        }
+        })
         $newElseClause = $this.VisitElement($ifStmtAst.ElseClause)
         return [IfStatementAst]::new($ifStmtAst.Extent, $newClauses, $newElseClause)
     }
