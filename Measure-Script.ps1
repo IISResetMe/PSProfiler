@@ -547,6 +547,11 @@ Function Measure-Script {
         }
         $ScriptText = Get-Content $path -Raw 
         $ScriptBlock = [scriptblock]::Create($ScriptText)
+        $Source = $path
+    } 
+    else {
+        $Source = '{{{0}}}' -f (New-Guid)
+        $Source = $Source -replace '-'
     }
     $ScriptBlock = [scriptblock]::Create($ScriptBlock.ToString())
     $profiler = [Profiler]::new($ScriptBlock.Ast.Extent)
@@ -560,6 +565,8 @@ Function Measure-Script {
             LineNo = $i+1 
             ExecutionTime = $profiler.StopWatches[$i].Elapsed
             Line = $lines[$i]
+            PSTypeName = 'ScriptLineMeasurement'
+            SourceScript = $Source
         }
     }
     if($ExecutionResultVariable) {
