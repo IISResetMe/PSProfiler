@@ -2,6 +2,23 @@ using namespace System.Collections.Generic
 using namespace System.Management.Automation.Language
 using namespace System.Diagnostics
 
+#region TimeLine
+class TimeLine
+{
+    [List[TimeSpan]]$TimeSpans
+
+    TimeLine()
+    {
+        $this.TimeSpans = [List[TimeSpan]]::new()
+    }
+
+    [void]Add([TimeSpan]$TimeSpan)
+    {
+        $this.TimeSpans.Add($TimeSpan)
+    }
+}
+#endregion
+
 #region Profiler
 class Profiler
 {
