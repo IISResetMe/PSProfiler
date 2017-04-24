@@ -96,7 +96,7 @@ Function Measure-Script {
     for($i = 0; $i -lt $lines.Count;$i++){
         [pscustomobject]@{
             LineNo = $i+1 
-            ExecutionTime = $profiler.StopWatches[$i].Elapsed
+            ExecutionTime = $profiler.TimeLines[$i].GetTotal()
             Line = $lines[$i]
             PSTypeName = 'ScriptLineMeasurement'
             SourceScript = $Source
