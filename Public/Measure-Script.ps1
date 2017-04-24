@@ -85,13 +85,14 @@ Function Measure-Script {
     $visitor  = [AstVisitor]::new($profiler)
     $newAst   = $ScriptBlock.Ast.Visit($visitor)
 
+    if(-not $PSBoundParameters.ContainsKey('ExecutionResultVariable')){
         $null = & $newAst.GetScriptBlock() @Arguments
     }
     else {
         $executionResult = . $newAst.GetScriptBlock() @Arguments
     }
 
-    [string[]]$lines = $ScriptBlock.ToString().Split("`n").TrimEnd()
+    [string[]]$lines = $ScriptBlock.ToString() -split '\r?\n' |ForEach-Object TrimEnd
     for($i = 0; $i -lt $lines.Count;$i++){
         [pscustomobject]@{
             LineNo = $i+1 
