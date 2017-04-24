@@ -32,13 +32,18 @@ class TimeLine
 class Profiler
 {
     [Stopwatch[]]$StopWatches
+    [TimeLine[]]$TimeLines
+
     Profiler([IScriptExtent]$extent)
     {
         $lines = $extent.EndLineNumber
         $this.StopWatches = [Stopwatch[]]::new($lines)
+        $this.TimeLines   = [TimeLine[]]::new($lines)
+
         for ($i = 0; $i -lt $lines; $i++)
         {
             $this.StopWatches[$i] = [Stopwatch]::new()
+            $this.TimeLines[$i]   = [TimeLine]::new()
         }
     }
 
@@ -50,6 +55,8 @@ class Profiler
     [void] EndLine([int] $lineNo)
     {
         $this.StopWatches[$lineNo].Stop()
+        $this.TimeLines[$lineNo].Add($this.StopWatches[$lineNo].Elapsed)
+        $this.StopWatches[$lineNo].Reset()
     }
 }
 #endregion
