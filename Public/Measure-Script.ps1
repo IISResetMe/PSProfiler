@@ -97,6 +97,7 @@ Function Measure-Script {
         [pscustomobject]@{
             LineNo = $i+1 
             ExecutionTime = $profiler.TimeLines[$i].GetTotal()
+            Iterations    = $profiler.TimeLines[$i].GetCount()
             Line = $lines[$i]
             PSTypeName = 'ScriptLineMeasurement'
             SourceScript = $Source

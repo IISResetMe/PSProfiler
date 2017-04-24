@@ -6,6 +6,7 @@ using namespace System.Diagnostics
 class TimeLine
 {
     [List[TimeSpan]]$TimeSpans
+    hidden [TimeSpan]$Total
 
     TimeLine()
     {
@@ -15,15 +16,22 @@ class TimeLine
     [void]Add([TimeSpan]$TimeSpan)
     {
         $this.TimeSpans.Add($TimeSpan)
+        $this.Total = $this.Total.Add($TimeSpan)
     }
 
     [TimeSpan]GetTotal()
     {
-        $Total = [TimeSpan]::Zero
-        $this.TimeSpans |ForEach-Object {
-            $Total = $Total.Add($_)
-        }
-        return $Total
+        return $this.Total
+    }
+
+    [TimeSpan]GetAverage()
+    {
+        return [TimeSpan]::FromTicks($this.GetTotal().Ticks / $this.GetCount())
+    }
+
+    [TimeSpan]GetCount()
+    {
+        return $this.TimeSpans.Count
     }
 }
 #endregion
