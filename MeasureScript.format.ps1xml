@@ -49,7 +49,7 @@ FormatData for MeasureScript
                    </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>Time Taken</Label>
-                        <Width>18</Width>
+                        <Width>16</Width>
                         <Alignment>right</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
