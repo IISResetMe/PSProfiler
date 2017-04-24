@@ -42,11 +42,16 @@ FormatData for MeasureScript
             </GroupBy>
             <TableControl>
                 <TableHeaders>
-                   <TableColumnHeader>
-                      <Label>Line</Label>
-                      <Width>6</Width>
-                      <Alignment>right</Alignment>
-                   </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Count</Label>
+                        <Width>11</Width>
+                        <Alignment>right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Line</Label>
+                        <Width>5</Width>
+                        <Alignment>right</Alignment>
+                    </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>Time Taken</Label>
                         <Width>16</Width>
@@ -62,6 +67,9 @@ FormatData for MeasureScript
                     <TableRowEntry>
                         <Wrap/>
                         <TableColumnItems>
+                            <TableColumnItem>
+                                <PropertyName>Iterations</PropertyName>
+                            </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>LineNo</PropertyName>
                             </TableColumnItem>
