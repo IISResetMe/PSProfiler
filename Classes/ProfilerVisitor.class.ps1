@@ -16,6 +16,15 @@ class TimeLine
     {
         $this.TimeSpans.Add($TimeSpan)
     }
+
+    [TimeSpan]GetTotal()
+    {
+        $Total = [TimeSpan]::Zero
+        $this.TimeSpans |ForEach-Object {
+            $Total = $Total.Add($_)
+        }
+        return $Total
+    }
 }
 #endregion
 
