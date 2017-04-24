@@ -84,7 +84,12 @@ Function Measure-Script {
     $profiler = [Profiler]::new($ScriptBlock.Ast.Extent)
     $visitor  = [AstVisitor]::new($profiler)
     $newAst   = $ScriptBlock.Ast.Visit($visitor)
-    $executionResult = . $newAst.GetScriptBlock() @Arguments
+
+        $null = & $newAst.GetScriptBlock() @Arguments
+    }
+    else {
+        $executionResult = . $newAst.GetScriptBlock() @Arguments
+    }
 
     [string[]]$lines = $ScriptBlock.ToString().Split("`n").TrimEnd()
     for($i = 0; $i -lt $lines.Count;$i++){
