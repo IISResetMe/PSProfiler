@@ -66,9 +66,7 @@ Function Measure-Script {
         [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
         [string]$ExecutionResultVariable,
         [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
-        [hashtable]$Arguments,
-        [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
-        [string]$VariableScope="1"
+        [hashtable]$Arguments
     )
     if($PSBoundParameters.Keys -icontains "Path") {
         if(-not (Test-Path $path)) {       
@@ -99,7 +97,12 @@ Function Measure-Script {
         }
     }
     if($ExecutionResultVariable) {
-        Set-Variable -Name $ExecutionResultVariable -Value $executionResult -Scope $VariableScope
+        try{
+            $PSCmdlet.SessionState.PSVariable.Set($ExecutionResultVariable, $executionResult)
+        }
+        catch{
+            Write-Error -Message "Error encountered setting ExecutionResultVariable: $_"
+        }
     }
 }
 
