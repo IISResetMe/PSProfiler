@@ -15,7 +15,7 @@ FormatData for MeasureScript
                                         <CustomItem>
                                             <ExpressionBinding>
                                               <ScriptBlock>
-                                                  if($_.SourceScript -match '^\{[a-z0-9]{32}\}$'){ 'Anonymous ScriptBlock' } else { $_.SourceScript }
+                                                  $_.SourceScript -replace '^\{[a-z0-9]{32}\}([\s.]*)','Anonymous ScriptBlock$1'
                                               </ScriptBlock>
                                             </ExpressionBinding>
                                             <NewLine/>
@@ -59,7 +59,6 @@ FormatData for MeasureScript
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>Statement</Label>
-                        <Width>40</Width>
                         <Alignment>left</Alignment>
                     </TableColumnHeader>
                 </TableHeaders>
@@ -68,7 +67,7 @@ FormatData for MeasureScript
                         <Wrap/>
                         <TableColumnItems>
                             <TableColumnItem>
-                                <PropertyName>Iterations</PropertyName>
+                                <ScriptBlock>'{0}' -f $($_.TimeLine.GetCount())</ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>LineNo</PropertyName>

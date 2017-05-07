@@ -66,7 +66,9 @@ Function Measure-Script {
         [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
         [string]$ExecutionResultVariable,
         [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
-        [hashtable]$Arguments
+        [hashtable]$Arguments,
+        [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
+        [string]$Name
     )
     if($PSBoundParameters.Keys -icontains "Path") {
         if(-not (Test-Path $path)) {       
@@ -80,6 +82,10 @@ Function Measure-Script {
         $Source = '{{{0}}}' -f (New-Guid)
         $Source = $Source -replace '-'
     }
+    if($PSBoundParameters.Keys -icontains "Name"){
+        $Source = "{0}: {1}$Name" -f $Source,$([System.Environment]::NewLine) 
+    }
+
     $ScriptBlock = [scriptblock]::Create($ScriptBlock.ToString())
     $profiler = [Profiler]::new($ScriptBlock.Ast.Extent)
     $visitor  = [AstVisitor]::new($profiler)
@@ -95,12 +101,12 @@ Function Measure-Script {
     [string[]]$lines = $ScriptBlock.ToString() -split '\r?\n' |ForEach-Object TrimEnd
     for($i = 0; $i -lt $lines.Count;$i++){
         [pscustomobject]@{
-            LineNo = $i+1 
+            LineNo        = $i + 1 
             ExecutionTime = $profiler.TimeLines[$i].GetTotal()
-            Iterations    = $profiler.TimeLines[$i].GetCount()
-            Line = $lines[$i]
-            PSTypeName = 'ScriptLineMeasurement'
-            SourceScript = $Source
+            TimeLine      = $profiler.TimeLines[$i]
+            Line          = $lines[$i]
+            SourceScript  = $Source
+            PSTypeName    = 'ScriptLineMeasurement'
         }
     }
     if($ExecutionResultVariable) {
