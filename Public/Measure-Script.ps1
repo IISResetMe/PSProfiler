@@ -5,7 +5,7 @@ using namespace System.Diagnostics
 #region Measure-Script
 Function Measure-Script {
 <#
-.SYNOPSIS 
+.SYNOPSIS
     Measures the execution time of each of the statements of a script or scriptblock
 
 .DESCRIPTION
@@ -34,7 +34,6 @@ Function Measure-Script {
     Arguments passed to the ScriptBlock or Script.
 
 .EXAMPLE
-
     Measure-Script -ScriptBlock {
         Get-Service | ForEach-Object {
             $_.name + " is " + $_.Status
@@ -43,41 +42,44 @@ Function Measure-Script {
 
     This measures the script block and returns the times executed for each line in the script block.
 
-    LineNo ExecutionTime    Line                                    
-    ------ -------------    ----                                    
-         1 00:00:00                                                 
-         2 00:00:00.0411606         Get-Service | ForEach-Object {  
-         3 00:00:00.0170710             $_.name + " is " + $_.Status
-         4 00:00:00                 }                               
-         5 00:00:00                                                 
+    Anonymous ScriptBlock
+
+
+      Count  Line       Time Taken Statement
+      -----  ----       ---------- ---------
+          0     1    00:00.0000000
+          1     2    00:00.5196413         Get-Service | ForEach-Object {
+        288     3    00:00.0902218             $_.name + " is " + $_.Status
+          0     4    00:00.0000000         }
+          0     5    00:00.0000000
 
 .EXAMPLE
     Measure-Scipt -Path c:\PS\GenerateUsername.ps1 -Arguments @{GivenName = "Joe";Surname = "Smith"}
 
     This will execute and measure the c:\PS\GenerateUsername.ps1 script with the -GivenName and -Surname parameters.
-    
+
 #>
-    [cmdletbinding(DefaultParameterSetName="ScriptBlock")]
+    [CmdletBinding(DefaultParameterSetName="ScriptBlock")]
     param(
-        [parameter(Mandatory=$true,ParameterSetName="ScriptBlock")]
+        [Parameter(Mandatory=$true,ParameterSetName="ScriptBlock",Position=0)]
         [scriptblock]$ScriptBlock,
-        [parameter(Mandatory=$true,ParameterSetName="Path")]
+        [Parameter(Mandatory=$true,ParameterSetName="Path",Position=0)]
         [string]$Path,
-        [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
+        [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
         [string]$ExecutionResultVariable,
-        [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
+        [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
         [hashtable]$Arguments,
-        [parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
+        [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
         [string]$Name
     )
     if($PSBoundParameters.Keys -icontains "Path") {
-        if(-not (Test-Path $path)) {       
+        if(-not (Test-Path $path)) {
             throw "No such file"
         }
-        $ScriptText = Get-Content $path -Raw 
+        $ScriptText = Get-Content $path -Raw
         $ScriptBlock = [scriptblock]::Create($ScriptText)
         $Source = $path
-    } 
+    }
     else {
         $Source = '{{{0}}}' -f (New-Guid)
         $Source = $Source -replace '-'
@@ -101,7 +103,7 @@ Function Measure-Script {
     [string[]]$lines = $ScriptBlock.ToString() -split '\r?\n' |ForEach-Object TrimEnd
     for($i = 0; $i -lt $lines.Count;$i++){
         [pscustomobject]@{
-            LineNo        = $i + 1 
+            LineNo        = $i + 1
             ExecutionTime = $profiler.TimeLines[$i].GetTotal()
             TimeLine      = $profiler.TimeLines[$i]
             Line          = $lines[$i]
