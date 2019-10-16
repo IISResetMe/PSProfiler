@@ -72,32 +72,42 @@ Function Measure-Script {
         [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
         [string]$Name
     )
-    if($PSBoundParameters.Keys -icontains "Path") {
-        if(-not (Test-Path $path)) {
-            throw "No such file"
+
+    if($PSCmdlet.ParameterSetName -eq "Path") {
+        if(-not (Test-Path $Path)) {
+            throw "No such file: '$Path'"
         }
-        $ScriptText = Get-Content $path -Raw
+        $ScriptText = Get-Content $Path -Raw
         $ScriptBlock = [scriptblock]::Create($ScriptText)
-        $Source = $path
+        $Source = $Path
     }
     else {
         $Source = '{{{0}}}' -f (New-Guid)
         $Source = $Source -replace '-'
+
+        $ssiPropertyInfo = [scriptblock].GetProperty('SessionStateInternal', [System.Reflection.BindingFlags]'Instance,NonPublic')
+        $callerSessionState = $ssiPropertyInfo.GetValue($ScriptBlock)
     }
+
     if($PSBoundParameters.Keys -icontains "Name"){
         $Source = "{0}: {1}$Name" -f $Source,$([System.Environment]::NewLine) 
     }
 
-    $ScriptBlock = [scriptblock]::Create($ScriptBlock.ToString())
     $profiler = [Profiler]::new($ScriptBlock.Ast.Extent)
     $visitor  = [AstVisitor]::new($profiler)
     $newAst   = $ScriptBlock.Ast.Visit($visitor)
 
+    $MeasureScriptblock = $newAst.GetScriptBlock()
+
+    if($PSCmdlet.ParameterSetName -eq "ScriptBlock"){
+        $ssiPropertyInfo.SetValue($MeasureScriptblock, $callerSessionState)
+    }
+
     if(-not $PSBoundParameters.ContainsKey('ExecutionResultVariable')){
-        $null = & $newAst.GetScriptBlock() @Arguments
+        $null = & $MeasureScriptblock @Arguments
     }
     else {
-        $executionResult = . $newAst.GetScriptBlock() @Arguments
+        $executionResult = . $MeasureScriptblock @Arguments
     }
 
     [string[]]$lines = $ScriptBlock.ToString() -split '\r?\n' |ForEach-Object TrimEnd
@@ -111,12 +121,13 @@ Function Measure-Script {
             PSTypeName    = 'ScriptLineMeasurement'
         }
     }
+
     if($ExecutionResultVariable) {
         try{
             $PSCmdlet.SessionState.PSVariable.Set($ExecutionResultVariable, $executionResult)
         }
         catch{
-            Write-Error -Message "Error encountered setting ExecutionResultVariable: $_"
+            Write-Error -Message "Error encountered setting ExecutionResultVariable '`${$ExecutionResultVariable}'" -Exception $_
         }
     }
 }
