@@ -182,7 +182,8 @@ class AstVisitor : ICustomAstVisitor
     [object] VisitCatchClause([CatchClauseAst] $catchClauseAst)
     {
         $newBody = $this.VisitElement($catchClauseAst.Body)
-        return [CatchClauseAst]::new($catchClauseAst.Extent, $catchClauseAst.CatchTypes, $newBody)
+        $newCatchTypes = $this.VisitElements($catchClauseAst.CatchTypes)
+        return [CatchClauseAst]::new($catchClauseAst.Extent, $newCatchTypes, $newBody)
     }
 
     [object] VisitTryStatement([TryStatementAst] $tryStatementAst)
