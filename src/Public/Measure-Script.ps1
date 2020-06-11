@@ -77,11 +77,17 @@ Function Measure-Script {
         if(-not (Test-Path $Path)) {
             throw "No such file: '$Path'"
         }
-        $ScriptText = Get-Content $Path -Raw
-        $ScriptBlock = [scriptblock]::Create($ScriptText)
+
+        $Errors = @()
+        $Ast = [Parser]::ParseFile((Get-Item $Path).FullName, [ref]$null, [ref]$Errors)
+        if($Errors){
+            Write-Error -Message "Encountered errors while parsing '$Path'"
+        }
+
         $Source = $Path
     }
     else {
+        $Ast = $ScriptBlock.Ast
         $Source = '{{{0}}}' -f (New-Guid)
         $Source = $Source -replace '-'
 
@@ -93,9 +99,9 @@ Function Measure-Script {
         $Source = "{0}: {1}$Name" -f $Source,$([System.Environment]::NewLine) 
     }
 
-    $profiler = [Profiler]::new($ScriptBlock.Ast.Extent)
+    $profiler = [Profiler]::new($Ast.Extent)
     $visitor  = [AstVisitor]::new($profiler)
-    $newAst   = $ScriptBlock.Ast.Visit($visitor)
+    $newAst   = $Ast.Visit($visitor)
 
     $MeasureScriptblock = $newAst.GetScriptBlock()
 
@@ -110,7 +116,7 @@ Function Measure-Script {
         $executionResult = . $MeasureScriptblock @Arguments
     }
 
-    [string[]]$lines = $ScriptBlock.ToString() -split '\r?\n' |ForEach-Object TrimEnd
+    [string[]]$lines = $Ast.Extent.ToString() -split '\r?\n' |ForEach-Object TrimEnd
     for($i = 0; $i -lt $lines.Count;$i++){
         [pscustomobject]@{
             LineNo        = $i + 1
