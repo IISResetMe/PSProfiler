@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<!-- *******************************************************************
+FormatData for MeasureScript
+******************************************************************** -->
+<Configuration>
+    <Controls>
+        <Control>
+            <Name>SourceScript-GroupingFormat</Name>
+                    <CustomControl>
+                        <CustomEntries>
+                            <CustomEntry>
+                                <CustomItem>
+                                    <Frame>
+                                        <LeftIndent>4</LeftIndent>
+                                        <CustomItem>
+                                            <ExpressionBinding>
+                                              <ScriptBlock>
+                                                  $_.SourceScript -replace '^\{[a-z0-9]{32}\}([\s.]*)','Anonymous ScriptBlock$1'
+                                              </ScriptBlock>
+                                            </ExpressionBinding>
+                                            <NewLine/>
+                                        </CustomItem> 
+                                    </Frame>
+                                </CustomItem>
+                            </CustomEntry>
+                        </CustomEntries>
+            </CustomControl>
+        </Control>
+    </Controls>
+    
+    <!-- ################ VIEW DEFINITIONS ################ -->
+
+    <ViewDefinitions>
+        <View>
+            <Name>measurementTable</Name>
+            <ViewSelectedBy>
+                <TypeName>ScriptLineMeasurement</TypeName>
+            </ViewSelectedBy>
+            <GroupBy>
+                <PropertyName>SourceScript</PropertyName> 
+                <CustomControlName>SourceScript-GroupingFormat</CustomControlName>  
+            </GroupBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>Count</Label>
+                        <Width>11</Width>
+                        <Alignment>right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Line</Label>
+                        <Width>5</Width>
+                        <Alignment>right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Time Taken</Label>
+                        <Width>16</Width>
+                        <Alignment>right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Statement</Label>
+                        <Alignment>left</Alignment>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <Wrap/>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <ScriptBlock>'{0}' -f $($_.TimeLine.GetCount())</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>LineNo</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>ExecutionTime</PropertyName>
+                                <FormatString>{0:mm\:ss\.fffffff}</FormatString>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Line</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>          
+    </ViewDefinitions>
+</Configuration>
