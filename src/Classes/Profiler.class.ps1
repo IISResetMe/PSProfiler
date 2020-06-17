@@ -7,10 +7,12 @@ class Profiler
 {
     [Stopwatch[]]$StopWatches
     [TimeLine[]]$TimeLines
+    [int]$Offset
 
     Profiler([IScriptExtent]$extent)
     {
         $lines = $extent.EndLineNumber
+        $this.Offset = $extent.StartLineNumber - 1
         $this.StopWatches = [Stopwatch[]]::new($lines)
         $this.TimeLines   = [TimeLine[]]::new($lines)
 
@@ -23,11 +25,12 @@ class Profiler
 
     [void] StartLine([int] $lineNo)
     {        
-        $this.StopWatches[$lineNo].Start()
+        $this.StopWatches[$lineNo - $this.Offset].Start()
     }
 
     [void] EndLine([int] $lineNo)
     {
+        $lineNo -= $this.Offset
         $this.StopWatches[$lineNo].Stop()
         $this.TimeLines[$lineNo].Add($this.StopWatches[$lineNo].Elapsed)
         $this.StopWatches[$lineNo].Reset()
