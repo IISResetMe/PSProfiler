@@ -1,0 +1,63 @@
+param(
+    [switch]$Force
+)
+
+$ErrorActionPreference = "Stop"
+
+# Attempt to retrieve relevant script files
+$Classes = Get-ChildItem (Join-Path $PSScriptRoot src\Classes) -ErrorAction SilentlyContinue -Filter *.class.ps1
+$Public  = Get-ChildItem (Join-Path $PSScriptRoot src\Public)  -ErrorAction SilentlyContinue -Filter *.ps1
+$Private = Get-ChildItem (Join-Path $PSScriptRoot src\Private) -ErrorAction SilentlyContinue -Filter *.ps1
+
+# classes on which other classes might depend, must be specified in order
+$ClassDependees = @(
+    'TimeLine'
+    'Profiler'
+)
+
+$publishDir = mkdir (Join-Path $PSScriptRoot publish\PSProfiler) @PSBoundParameters
+
+$moduleFile = New-Item -Path $publishDir.FullName -Name "PSProfiler.psm1" -ItemType File @PSBoundParameters
+
+@'
+using namespace System.Collections.Generic
+using namespace System.Management.Automation.Language
+using namespace System.Diagnostics
+'@ |Add-Content -LiteralPath $moduleFile.FullName @PSBoundParameters
+
+# import classes on which others depend first
+foreach($classDependee in $ClassDependees)
+{
+    try{
+        Get-Content (Join-Path (Join-Path $PSScriptRoot src\Classes) "$classDependee.class.ps1") |Where-Object {$_ -notlike 'using namespace*'} |Add-Content -LiteralPath $moduleFile.FullName @PSBoundParameters
+    }
+    catch{
+        Write-Error -Message "Failed to import class $($classDependee): $_"
+    }
+}
+
+# import any remaining class files
+foreach($class in $Classes |Where-Object {($_.Name -replace '\.class\.ps1') -notin $ClassDependees})
+{
+    try{
+        $class |Get-Content |Where-Object {$_ -notlike 'using namespace*'} |Add-Content -LiteralPath $moduleFile.FullName
+    }
+    catch{
+        Write-Error -Message "Failed to import dependant class $($class.fullname): $_"
+    }    
+}
+
+# dot source the functions
+foreach($import in @($Public;$Private))
+{
+    try{
+        $import |Get-Content |Where-Object {$_ -notlike 'using namespace*'} |Add-Content -LiteralPath $moduleFile.FullName
+    }
+    catch{
+        Write-Error -Message "Failed to import function $($import.fullname): $_"
+    }
+}
+
+"Export-ModuleMember -Function $($Public.BaseName -join ',')" |Add-Content -LiteralPath $moduleFile.FullName @PSBoundParameters
+Copy-Item (Join-Path $PSScriptRoot src\PSProfiler.psd1) -Destination $publishDir.FullName @PSBoundParameters
+Copy-Item (Join-Path $PSScriptRoot src\PSProfiler.format.ps1xml) -Destination $publishDir.FullName @PSBoundParameters
