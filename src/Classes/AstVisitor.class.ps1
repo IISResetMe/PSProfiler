@@ -132,10 +132,11 @@ class AstVisitor : ICustomAstVisitor,ICustomAstVisitor2
     [object] VisitSwitchStatement([SwitchStatementAst] $switchStatementAst)
     {
         $newCondition = $this.VisitElement($switchStatementAst.Condition)
-        $newClauses = $switchStatementAst.Clauses | ForEach-Object {
+        $newClauses = [List[Tuple[ExpressionAst,StatementBlockAst]]]::new()
+        $switchStatementAst.Clauses | ForEach-Object {
             $newClauseTest = $this.VisitElement($_.Item1)
             $newStatementBlock = $this.VisitElement($_.Item2)
-            [Tuple[ExpressionAst,StatementBlockAst]]::new($newClauseTest,$newStatementBlock)
+            $newClauses.Add([Tuple[ExpressionAst,StatementBlockAst]]::new($newClauseTest,$newStatementBlock))
         }
         $newDefault = $this.VisitElement($switchStatementAst.Default)
         return [SwitchStatementAst]::new($switchStatementAst.Extent, $switchStatementAst.Label,$newCondition,$switchStatementAst.Flags, $newClauses, $newDefault)
