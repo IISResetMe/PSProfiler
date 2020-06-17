@@ -2,7 +2,7 @@ using namespace System.Collections.Generic
 using namespace System.Management.Automation.Language
 
 #region AstVisitor 
-class AstVisitor : ICustomAstVisitor
+class AstVisitor : ICustomAstVisitor,ICustomAstVisitor2
 {
     [Profiler]$Profiler = $null
     AstVisitor([Profiler]$profiler) {
@@ -444,6 +444,87 @@ class AstVisitor : ICustomAstVisitor
     {
         $newBody = $this.VisitElement($blockStatementAst.Body)
         return [BlockStatementAst]::new($blockStatementAst.Extent, $blockStatementAst.Kind, $newBody)
+    }
+
+    [object] VisitTypeDefinition([TypeDefinitionAst] $typeDefinitionAst)
+    {
+        $newAttributes = $this.VisitElements($typeDefinitionAst.Attributes)
+        $newBaseTypes = $this.VisitElements($typeDefinitionAst.BaseTypes)
+        $newMembers = $this.VisitElements($typeDefinitionAst.Members)
+
+        return [TypeDefinitionAst]::new($typeDefinitionAst.Extent, $typeDefinitionAst.Name, $newAttributes, $newMembers, $typeDefinitionAst.TypeAttributes, $newBaseTypes)
+    }
+
+    [object] VisitPropertyMember([PropertyMemberAst] $propertyMemberAst)
+    {
+        $newPropertyType = $this.VisitElement($propertyMemberAst.PropertyType)
+        $newAttributes = $this.VisitElements($propertyMemberAst.Attributes)
+        $newInitValue = $this.VisitElement($propertyMemberAst.InitialValue)
+        return [PropertyMemberAst]::new($propertyMemberAst.Extent, $propertyMemberAst.Name, $newPropertyType, $newAttributes, $propertyMemberAst.PropertyAttributes, $newInitValue)
+    }
+
+    [object] VisitFunctionMember([FunctionMemberAst] $functionMemberAst)
+    {
+        $newBody = $this.VisitElement($functionMemberAst.Body)
+        $newParameters = $this.VisitElements($functionMemberAst.Parameters)
+        $newFunctionDefinition = $this.VisitElement($functionMemberAst.Extent, $false, $false, $functionMemberAst.Name, $newParameters, $newBody)
+
+        $newReturnType = $this.VisitElement($functionMemberAst.ReturnType)
+        $newAttributes = $this.VisitElements($functionMemberAst.Attributes)
+        return [FunctionMemberAst]::new($functionMemberAst.Extent, $newFunctionDefinition, $newReturnType, $newAttributes, $functionMemberAst.MethodAttributes)
+    }
+
+    [object] VisitBaseCtorInvokeMemberExpression([BaseCtorInvokeMemberExpressionAst] $baseCtorAst)
+    {
+        $newInvokeMemberExpression = $this.VisitInvokeMemberExpression($baseCtorAst)
+        return [BaseCtorInvokeMemberExpressionAst]::new($baseCtorAst.Expression.Extent, $newInvokeMemberExpression.Extent, $newInvokeMemberExpression)
+    }
+
+    [object] VisitUsingStatement([UsingStatementAst] $usingStatementAst)
+    {
+        $newName = $this.VisitElement($usingStatementAst.Name)
+        $newAlias = if($usingStatementAst.Alias -is [StringConstantExpressionAst]){
+            $this.VisitElement($usingStatementAst.Alias)
+        }
+
+        switch($usingStatementAst.UsingStatementKind)
+        {
+            'Module' {
+                if($usingStatementAst.ModuleSpecification -is [HashtableAst]){
+                    $newModuleSpec = $this.VisitElement($usingStatementAst.ModuleSpecification)
+                    if($newAlias){
+                        return [UsingStatementAst]::new($usingStatementAst.Extent, $newName, $newModuleSpec)
+                    }
+                    return [UsingStatementAst]::new($usingStatementAst.Extent, $newModuleSpec)
+                }
+                if($newAlias){
+                    return [UsingStatementAst]::new($usingStatementAst.Extent, $_, $newName, $newAlias)
+                }
+                return [UsingStatementAst]::new($usingStatementAst.Extent, $_, $newName)
+            }
+
+            default {
+                if($newAlias){
+                    return [UsingStatementAst]::new($usingStatementAst.Extent, $_, $newName, $newAlias)
+                }
+                return [UsingStatementAst]::new($usingStatementAst.Extent, $_, $newName)
+            }
+        }
+
+        throw [System.NotImplementedException]::new()
+    }
+
+    [object] VisitConfigurationDefinition([ConfigurationDefinitionAst]$configDefinitionAst)
+    {
+        $newConfig = $this.VisitElement($configDefinitionAst.Body)
+        $newInstanceName = $this.VisitElement($configDefinitionAst.InstanceName)
+        return [ConfigurationDefinitionAst]::new($configDefinitionAst.Extent, $newConfig, $configDefinitionAst.ConfigurationType, $newInstanceName)
+    }
+
+    [object] VisitDynamicKeywordStatement([DynamicKeywordStatementAst]$dynamicKeywordAst)
+    {
+        $newElements = $this.VisitElements($dynamicKeywordAst.CommandElements)
+        return [DynamicKeywordStatementAst]::new($dynamicKeywordAst.Extent, $newElements)
     }
 }
 #endregion
