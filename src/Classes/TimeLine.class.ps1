@@ -24,6 +24,10 @@ class TimeLine
 
     [TimeSpan]GetAverage()
     {
+        if($count = $this.GetCount() -eq 0){
+            return [TimeSpan]::Zero
+        }
+
         return [TimeSpan]::FromTicks($this.GetTotal().Ticks / $this.GetCount())
     }
 
