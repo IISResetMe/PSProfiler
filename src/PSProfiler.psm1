@@ -26,6 +26,7 @@ foreach($classDependee in $ClassDependees)
 foreach($class in $Classes|Where-Object {($_.Name -replace '\.class\.ps1') -notin $ClassDependees})
 {
     try{
+        Write-Verbose "Importing class $class"
         . $class.fullname
     }
     catch{
@@ -43,6 +44,7 @@ foreach($import in @($Public;$Private))
         Write-Error -Message "Failed to import function $($import.fullname): $_"
     }
 }
+Write-Verbose "Exporting functions $($public.basename)"
 
 # export public members
 Export-ModuleMember -Function $Public.BaseName
