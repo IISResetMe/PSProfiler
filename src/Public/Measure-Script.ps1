@@ -117,13 +117,22 @@ Function Measure-Script {
     }
 
     [string[]]$lines = $Ast.Extent.ToString() -split '\r?\n' |ForEach-Object TrimEnd
+
+    $executionTimes = [System.Collections.Generic.List[TimeSpan]]::new()
+    for($i = 0; $i -lt $lines.Count;$i++){
+        $executionTimes.Add($profiler.TimeLines[$i].GetTotal())
+    }
+
+    $top5 = $executionTimes.Ticks | Sort-Object -Descending | Select-Object -First 5
+
     for($i = 0; $i -lt $lines.Count;$i++){
         [pscustomobject]@{
             LineNo        = $i + 1
-            ExecutionTime = $profiler.TimeLines[$i].GetTotal()
+            ExecutionTime = $executionTimes[$i]
             TimeLine      = $profiler.TimeLines[$i]
             Line          = $lines[$i]
             SourceScript  = $Source
+            Top           = ($top5 -contains $executionTimes[$i].Ticks)
             PSTypeName    = 'ScriptLineMeasurement'
         }
     }

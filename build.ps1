@@ -15,7 +15,7 @@ $ClassDependees = @(
     'Profiler'
 )
 
-$publishDir = mkdir (Join-Path $PSScriptRoot publish\PSProfiler) @PSBoundParameters
+$publishDir = New-Item -ItemType Directory -Path (Join-Path $PSScriptRoot publish\PSProfiler) @PSBoundParameters
 
 $moduleFile = New-Item -Path $publishDir.FullName -Name "PSProfiler.psm1" -ItemType File @PSBoundParameters
 

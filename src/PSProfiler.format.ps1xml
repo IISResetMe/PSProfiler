@@ -73,8 +73,14 @@ FormatData for MeasureScript
                                 <PropertyName>LineNo</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>ExecutionTime</PropertyName>
-                                <FormatString>{0:mm\:ss\.fffffff}</FormatString>
+                                <ScriptBlock>
+                                    if ($_.Top -and $PSStyle -ne $null) {
+                                        $PSStyle.Background.Red + ($_.ExecutionTime -f '{0:mm\:ss\.fffffff}') + $PSStyle.Reset
+                                    }
+                                    else {
+                                        $_.ExecutionTime -f '{0:mm\:ss\.fffffff}'
+                                    }
+                                </ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>Line</PropertyName>
