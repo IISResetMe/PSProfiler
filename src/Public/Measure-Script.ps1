@@ -127,7 +127,7 @@ Function Measure-Script {
 
     $topLimit = [long]::MaxValue
     if($Top) {
-        $topLimit = $executionTimes.Ticks | Sort-Object -Descending | Select-Object -First 5 | Select-Object -Last 1
+        $topLimit = $executionTimes.Ticks | Sort-Object -Descending | Select-Object -First $Top | Select-Object -Last 1
     }
 
     for($i = 0; $i -lt $lines.Count;$i++){
