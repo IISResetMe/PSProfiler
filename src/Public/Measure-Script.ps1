@@ -70,7 +70,9 @@ Function Measure-Script {
         [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
         [hashtable]$Arguments,
         [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
-        [string]$Name
+        [string]$Name,
+        [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
+        [int]$Top = 5
     )
 
     if($PSCmdlet.ParameterSetName -eq "Path") {
@@ -117,13 +119,25 @@ Function Measure-Script {
     }
 
     [string[]]$lines = $Ast.Extent.ToString() -split '\r?\n' |ForEach-Object TrimEnd
+
+    $executionTimes = [System.Collections.Generic.List[TimeSpan]]::new()
+    for($i = 0; $i -lt $lines.Count;$i++){
+        $executionTimes.Add($profiler.TimeLines[$i].GetTotal())
+    }
+
+    $topLimit = [long]::MaxValue
+    if($Top) {
+        $topLimit = $executionTimes.Ticks | Sort-Object -Descending | Select-Object -First 5 | Select-Object -Last 1
+    }
+
     for($i = 0; $i -lt $lines.Count;$i++){
         [pscustomobject]@{
             LineNo        = $i + 1
-            ExecutionTime = $profiler.TimeLines[$i].GetTotal()
+            ExecutionTime = $executionTimes[$i]
             TimeLine      = $profiler.TimeLines[$i]
             Line          = $lines[$i]
             SourceScript  = $Source
+            Top           = $executionTimes[$i].Ticks -ge $topLimit
             PSTypeName    = 'ScriptLineMeasurement'
         }
     }
@@ -137,4 +151,3 @@ Function Measure-Script {
         }
     }
 }
-
