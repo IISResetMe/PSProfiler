@@ -75,7 +75,7 @@ FormatData for MeasureScript
                             <TableColumnItem>
                                 <ScriptBlock>
                                     if ($_.Top -and $PSStyle -ne $null) {
-                                        $PSStyle.Background.Red + ($_.ExecutionTime -f '{0:mm\:ss\.fffffff}') + $PSStyle.Reset
+                                        $PSStyle.Background.Red + ('{0:mm\:ss\.fffffff}' -f $_.ExecutionTime) + $PSStyle.Reset
                                     }
                                     else {
                                         $_.ExecutionTime -f '{0:mm\:ss\.fffffff}'
