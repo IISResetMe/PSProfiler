@@ -527,5 +527,22 @@ class PSPVisitor : ICustomAstVisitor,ICustomAstVisitor2
         $newElements = $this.VisitElements($dynamicKeywordAst.CommandElements)
         return [DynamicKeywordStatementAst]::new($dynamicKeywordAst.Extent, $newElements)
     }
+
+    # V7 nodes
+    [object] VisitTernaryExpression([TernaryExpressionAst]$ternaryExpressionAst)
+    {
+        $newCondition = $this.VisitElement($ternaryExpressionAst.Condition)
+        $newIfTrue = $this.VisitElement($ternaryExpressionAst.IfTrue)
+        $newIfFalse = $this.VisitElement($ternaryExpressionAst.IfFalse)
+        return [TernaryExpressionAst]::new($ternaryExpressionAst.Extent, $newCondition, $newIfTrue, $newIfFalse)
+    }
+
+    [object] VisitPipelineChain([PipelineChainAst]$pipelineChainAst)
+    {
+        $newOperator = $this.VisitElement($pipelineChainAst.Operator)
+        $newLhsPipeline = $this.VisitElement($pipelineChainAst.LhsPipelineChain)
+        $newRhsPipeline = $this.VisitElement($pipelineChainAst.RhsPipeline)
+        return [PipelineChainAst]::new($pipelineChainAst.Extent, $newOperator, $newLhsPipeline, $newRhsPipeline)
+    }
 }
 #endregion
