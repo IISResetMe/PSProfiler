@@ -36,16 +36,19 @@ foreach($classDependee in $ClassDependees)
     }
 }
 
-# import any remaining class files
-foreach($class in $Classes |Where-Object {($_.Name -replace '\.class\.ps1') -notin $ClassDependees})
-{
-    try{
-        $class |Get-Content |Where-Object {$_ -notlike 'using namespace*'} |Add-Content -LiteralPath $moduleFile.FullName
+@'
+$Visitor = switch($PSVersionTable['PSVersion'].Major){
+    {$_ -ge 7} {
+        "AstVisitor7.class.ps1"
     }
-    catch{
-        Write-Error -Message "Failed to import dependant class $($class.fullname): $_"
-    }    
+    default {
+        "AstVisitor.class.ps1"
+    }
 }
+
+Write-Verbose "Loading '$Visitor'"
+. (Join-Path $PSScriptRoot $Visitor)
+'@ |Add-Content -LiteralPath $moduleFile.FullName
 
 # dot source the functions
 foreach($import in @($Public;$Private))
@@ -61,3 +64,4 @@ foreach($import in @($Public;$Private))
 "Export-ModuleMember -Function $($Public.BaseName -join ',')" |Add-Content -LiteralPath $moduleFile.FullName @PSBoundParameters
 Copy-Item (Join-Path $PSScriptRoot src\PSProfiler.psd1) -Destination $publishDir.FullName @PSBoundParameters
 Copy-Item (Join-Path $PSScriptRoot src\PSProfiler.format.ps1xml) -Destination $publishDir.FullName @PSBoundParameters
+Copy-Item (Join-Path $PSScriptRoot src\Classes\AstVisitor*.class.ps1) -Destination $publishDir.FullName @PSBoundParameters -PassThru

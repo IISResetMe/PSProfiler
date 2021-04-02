@@ -1,7 +1,6 @@
 $ErrorActionPreference = "Stop"
 
 # Attempt to retrieve relevant script files
-$Classes = Get-ChildItem (Join-Path $PSScriptRoot Classes) -ErrorAction SilentlyContinue -Filter *.class.ps1
 $Public  = Get-ChildItem (Join-Path $PSScriptRoot Public)  -ErrorAction SilentlyContinue -Filter *.ps1
 $Private = Get-ChildItem (Join-Path $PSScriptRoot Private) -ErrorAction SilentlyContinue -Filter *.ps1
 
@@ -22,17 +21,17 @@ foreach($classDependee in $ClassDependees)
     }
 }
 
-# import any remaining class files
-foreach($class in $Classes|Where-Object {($_.Name -replace '\.class\.ps1') -notin $ClassDependees})
-{
-    try{
-        . $class.fullname
+$Visitor = switch($PSVersionTable['PSVersion'].Major){
+    {$_ -ge 7} {
+        "AstVisitor7.class.ps1"
     }
-    catch{
-        Write-Error -Message "Failed to import dependant class $($class.fullname): $_"
-    }    
+    default {
+        "AstVisitor.class.ps1"
+    }
 }
 
+Write-Verbose "Loading '$Visitor'"
+. (Join-Path (Join-Path $PSScriptRoot .\Classes) $Visitor)
 # dot source the functions
 foreach($import in @($Public;$Private))
 {

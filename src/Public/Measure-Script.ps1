@@ -100,7 +100,7 @@ Function Measure-Script {
     }
 
     $profiler = [Profiler]::new($Ast.Extent)
-    $visitor  = [AstVisitor]::new($profiler)
+    $visitor  = [PSPVisitor]::new($profiler)
     $newAst   = $Ast.Visit($visitor)
 
     $MeasureScriptblock = $newAst.GetScriptBlock()
