@@ -4,8 +4,8 @@ using namespace System.Management.Automation.Language
 #region AstVisitor 
 class PSPVisitor : ICustomAstVisitor,ICustomAstVisitor2
 {
-    [Profiler]$Profiler = $null
-    PSPVisitor([Profiler]$profiler) {
+    [GranularProfiler]$Profiler = $null
+    PSPVisitor([GranularProfiler]$profiler) {
         $this.Profiler = $profiler
     }
     [Object] VisitElement([object]$element) {
@@ -36,14 +36,15 @@ class PSPVisitor : ICustomAstVisitor,ICustomAstVisitor2
             {
                 [bool]$instrument = $statement -is [PipelineBaseAst]
                 $extent = $statement.Extent
+                $id = $extent.StartLineNumber,$extent.StartColumnNumber,$extent.EndLineNumber,$extent.EndColumnNumber -join '_'
                 if ($instrument)
                 {
                     $this.Profiler.MeasureExtent($extent)
                     $expressionAstCollection = [List[ExpressionAst]]::new()
-                    $constantExpression = [ConstantExpressionAst]::new($extent, $extent.StartLineNumber - 1)
+                    $constantExpression = [StringConstantExpressionAst]::new($extent, $id, [StringConstantType]::BareWord)
                     $expressionAstCollection.Add($constantExpression)
                     $constantProfiler = [ConstantExpressionAst]::new($extent, $this.Profiler)
-                    $constantStartline = [StringConstantExpressionAst]::new($extent, "StartLine", [StringConstantType]::BareWord)
+                    $constantStartline = [StringConstantExpressionAst]::new($extent, "StartExtent", [StringConstantType]::BareWord)
                     $invokeMember = [InvokeMemberExpressionAst]::new(
                             $extent,
                             $constantProfiler,
@@ -63,13 +64,13 @@ class PSPVisitor : ICustomAstVisitor,ICustomAstVisitor2
                 if ($instrument)
                 {
                     $expressionAstCollection = [List[ExpressionAst]]::new()
-                    $expressionAstCollection.Add([ConstantExpressionAst]::new($extent, $extent.StartLineNumber - 1))
+                    $expressionAstCollection.Add([StringConstantExpressionAst]::new($extent, $id, [StringConstantType]::BareWord))
                     $endLine = [CommandExpressionAst]::new(
                         $extent, 
                         [InvokeMemberExpressionAst]::new(
                             $extent,
                             [ConstantExpressionAst]::new($extent, $this.Profiler),
-                            [StringConstantExpressionAst]::new($extent, "EndLine", [StringConstantType]::BareWord),
+                            [StringConstantExpressionAst]::new($extent, "EndExtent", [StringConstantType]::BareWord),
                             $expressionAstCollection, 
                             $false
                         ), 

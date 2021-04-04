@@ -1,9 +1,13 @@
 function Visit-Ast {
     param(
-        [Ast]$Ast
+        [Ast]$Ast,
+
+        $Profiler
     )
 
-    $profiler = [Profiler]::new($Ast.Extent)
+    if(-not $PSBoundParameters.ContainsKey('Profiler')){
+        $profiler = [Profiler]::new($Ast.Extent)
+    }
     $visitor  = [PSPVisitor]::new($profiler)
 
     return [PSCustomObject]@{

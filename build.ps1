@@ -13,6 +13,7 @@ $Private = Get-ChildItem (Join-Path $PSScriptRoot src\Private) -ErrorAction Sile
 $ClassDependees = @(
     'TimeLine'
     'Profiler'
+    'GranularProfiler'
 )
 
 $publishDir = New-Item -ItemType Directory -Path (Join-Path $PSScriptRoot publish\PSProfiler) @PSBoundParameters
