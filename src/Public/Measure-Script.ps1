@@ -101,11 +101,9 @@ Function Measure-Script {
         $Source = "{0}: {1}$Name" -f $Source,$([System.Environment]::NewLine) 
     }
 
-    $profiler = [Profiler]::new($Ast.Extent)
-    $visitor  = [PSPVisitor]::new($profiler)
-    $newAst   = $Ast.Visit($visitor)
+    $PSProfiler = Visit-Ast $Ast
 
-    $MeasureScriptblock = $newAst.GetScriptBlock()
+    $MeasureScriptblock = $PSProfiler.NewAst.GetScriptBlock()
 
     if($PSCmdlet.ParameterSetName -eq "ScriptBlock"){
         $ssiPropertyInfo.SetValue($MeasureScriptblock, $callerSessionState)
@@ -118,11 +116,11 @@ Function Measure-Script {
         $executionResult = . $MeasureScriptblock @Arguments
     }
 
-    [string[]]$lines = $Ast.Extent.ToString() -split '\r?\n' |ForEach-Object TrimEnd
+    [string[]]$lines = $PSProfiler.Profiler.RootExtent.ToString() -split '\r?\n' |ForEach-Object TrimEnd
 
     $executionTimes = [System.Collections.Generic.List[TimeSpan]]::new()
     for($i = 0; $i -lt $lines.Count;$i++){
-        $executionTimes.Add($profiler.TimeLines[$i].GetTotal())
+        $executionTimes.Add($PSProfiler.Profiler.TimeLines[$i].GetTotal())
     }
 
     $topLimit = [long]::MaxValue
@@ -134,7 +132,7 @@ Function Measure-Script {
         [pscustomobject]@{
             LineNo        = $i + 1
             ExecutionTime = $executionTimes[$i]
-            TimeLine      = $profiler.TimeLines[$i]
+            TimeLine      = $PSProfiler.Profiler.TimeLines[$i]
             Line          = $lines[$i]
             SourceScript  = $Source
             Top           = $executionTimes[$i].Ticks -ge $topLimit

@@ -5,12 +5,16 @@ using namespace System.Management.Automation.Language
 #region Profiler
 class Profiler
 {
+    [IScriptExtent]$RootExtent
+    [List[IScriptExtent]]$MeasuredExtents
     [Stopwatch[]]$StopWatches
     [TimeLine[]]$TimeLines
     [int]$Offset
 
     Profiler([IScriptExtent]$extent)
     {
+        $this.RootExtent = $extent
+        $this.MeasuredExtents = [List[IScriptExtent]]::new()
         $lines = $extent.EndLineNumber
         $this.Offset = $extent.StartLineNumber - 1
         $this.StopWatches = [Stopwatch[]]::new($lines)
@@ -21,6 +25,11 @@ class Profiler
             $this.StopWatches[$i] = [Stopwatch]::new()
             $this.TimeLines[$i]   = [TimeLine]::new()
         }
+    }
+
+    [void] MeasureExtent([IScriptExtent]$extent)
+    {
+        $this.MeasuredExtents.Add($extent)
     }
 
     [void] StartLine([int] $lineNo)

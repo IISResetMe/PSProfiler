@@ -28,7 +28,7 @@ class TimeLine
             return [TimeSpan]::Zero
         }
 
-        return [TimeSpan]::FromTicks($this.GetTotal().Ticks / $this.GetCount())
+        return [TimeSpan]::FromTicks($this.GetTotal().Ticks / $count)
     }
 
     [int]GetCount()

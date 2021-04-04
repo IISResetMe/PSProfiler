@@ -38,6 +38,7 @@ class PSPVisitor : ICustomAstVisitor,ICustomAstVisitor2
                 $extent = $statement.Extent
                 if ($instrument)
                 {
+                    $this.Profiler.MeasureExtent($extent)
                     $expressionAstCollection = [List[ExpressionAst]]::new()
                     $constantExpression = [ConstantExpressionAst]::new($extent, $extent.StartLineNumber - 1)
                     $expressionAstCollection.Add($constantExpression)
