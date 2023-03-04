@@ -22,6 +22,14 @@ class TimeLine
         return $this.Total
     }
 
+    [String]GetTotalFormatted([boolean]$HumanReadable)
+    {
+        if ($HumanReadable) {
+            return '{0}ms' -f $([math]::Round($this.Total.TotalMilliseconds))
+        }
+        return '{0:mm\:ss\.fffffff}' -f $this.Total
+    }
+
     [TimeSpan]GetAverage()
     {
         if($count = $this.GetCount() -eq 0){

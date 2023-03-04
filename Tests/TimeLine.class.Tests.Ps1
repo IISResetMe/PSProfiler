@@ -1,6 +1,6 @@
-﻿Import-Module "$PSScriptRoot\..\src\MeasureScript.psd1" -Force
+﻿Import-Module "$PSScriptRoot\..\src\PSProfiler.psd1" -Force
 
-InModuleScope -ModuleName MeasureScript -ScriptBlock {
+InModuleScope -ModuleName PSProfiler -ScriptBlock {
 
 
 Describe '[TimeLine]-[Constructors]'{
@@ -81,6 +81,23 @@ $Instance = [TimeLine]::New()
 ($Instance.GetTotal()).GetType().Name | should be TimeSpan
 
 } #End It Block
+
+It '[TimeLine] --> GetTotalFormatted() : [string] - should return type [string]' {    
+    $Instance = [TimeLine]::New()    
+    ($Instance.GetTotalFormatted($true)).GetType().Name | should be String
+}
+
+It '[TimeLine] --> GetTotalFormatted($true) : [string] - should return ms' {    
+    $Instance = [TimeLine]::New()    
+    $Instance.Add([TimeSpan]::FromMilliseconds(500))
+    $Instance.GetTotalFormatted($true) | should be "500ms"
+}
+
+It '[TimeLine] --> GetTotalFormatted($false) : [string] - should return timespan format' {    
+    $Instance = [TimeLine]::New()    
+    $Instance.Add([TimeSpan]::FromMilliseconds(500))
+    $Instance.GetTotalFormatted($false) | should be "00:00.5000000"
+}
 
 #Public Method
 It '[TimeLine] --> GetAverage() : [TimeSpan] - should Not Throw' {

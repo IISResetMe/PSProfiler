@@ -1,8 +1,8 @@
 ﻿
 
-Import-Module "$PSScriptRoot\..\src\MeasureScript.psd1" -Force
+Import-Module "$PSScriptRoot\..\src\PSProfiler.psd1" -Force
 
-InModuleScope  "MeasureScript"{
+InModuleScope  "PSProfiler"{
 
     Describe '[Profiler]-[Constructors]'{
 

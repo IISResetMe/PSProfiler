@@ -1,6 +1,6 @@
-﻿Import-Module "$PSScriptRoot\..\src\MeasureScript.psd1" -Force
+﻿Import-Module "$PSScriptRoot\..\src\PSProfiler.psd1" -Force
 
-InModuleScope -ModuleName MeasureScript -ScriptBlock {
+InModuleScope -ModuleName PSProfiler -ScriptBlock {
 
 Describe '[AstVisitor]-[Constructors]'{
 
