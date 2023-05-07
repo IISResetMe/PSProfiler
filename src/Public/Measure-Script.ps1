@@ -54,7 +54,7 @@ Function Measure-Script {
           0     5    00:00.0000000
 
 .EXAMPLE
-    Measure-Scipt -Path c:\PS\GenerateUsername.ps1 -Arguments @{GivenName = "Joe";Surname = "Smith"}
+    Measure-Script -Path c:\PS\GenerateUsername.ps1 -Arguments @{GivenName = "Joe";Surname = "Smith"}
 
     This will execute and measure the c:\PS\GenerateUsername.ps1 script with the -GivenName and -Surname parameters.
 
@@ -72,7 +72,8 @@ Function Measure-Script {
         [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
         [string]$Name,
         [Parameter(Mandatory=$false,ParameterSetName="__AllParametersets")]
-        [int]$Top = 5
+        [int]$Top = 5,
+        [switch]$HumanReadable
     )
 
     if($PSCmdlet.ParameterSetName -eq "Path") {
@@ -135,6 +136,7 @@ Function Measure-Script {
             LineNo        = $i + 1
             ExecutionTime = $executionTimes[$i]
             TimeLine      = $profiler.TimeLines[$i]
+            Formatted     = $profiler.TimeLines[$i].GetTotalFormatted($HumanReadable)
             Line          = $lines[$i]
             SourceScript  = $Source
             Top           = $executionTimes[$i].Ticks -ge $topLimit
