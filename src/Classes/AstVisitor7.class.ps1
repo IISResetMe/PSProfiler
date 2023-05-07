@@ -539,10 +539,9 @@ class PSPVisitor : ICustomAstVisitor,ICustomAstVisitor2
 
     [object] VisitPipelineChain([PipelineChainAst]$pipelineChainAst)
     {
-        $newOperator = $this.VisitElement($pipelineChainAst.Operator)
         $newLhsPipeline = $this.VisitElement($pipelineChainAst.LhsPipelineChain)
         $newRhsPipeline = $this.VisitElement($pipelineChainAst.RhsPipeline)
-        return [PipelineChainAst]::new($pipelineChainAst.Extent, $newOperator, $newLhsPipeline, $newRhsPipeline)
+        return [PipelineChainAst]::new($pipelineChainAst.Extent, $newLhsPipeline, $newRhsPipeline, $pipelineChainAst.Operator, $pipelineChainAst.Background)
     }
 }
 #endregion
